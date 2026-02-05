@@ -1,18 +1,15 @@
 // api/chat.js
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
+  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
   const { message } = req.body;
   if (!message) return res.status(400).json({ error: "No message provided" });
 
-  // Your Hugging Face token stored as environment variable
   const HF_TOKEN = process.env.HF_TOKEN;
 
   try {
     const response = await fetch(
-      "https://api-inference.huggingface.co/models/microsoft/Phi-3-mini-4k-instruct", // your model name
+      "https://api-inference.huggingface.co/models/microsoft/Phi-3-mini-4k-instruct",
       {
         method: "POST",
         headers: {
