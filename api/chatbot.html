@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AI Chatbot</title>
+  <style>
+    body { font-family: Arial; }
+    #chat { border: 1px solid #ccc; padding: 10px; width: 300px; height: 400px; overflow-y: scroll; }
+    #userInput { width: 240px; }
+    .user { color: blue; }
+    .bot { color: green; }
+  </style>
+</head>
+<body>
+  <h2>Chat with AI</h2>
+  <div id="chat"></div>
+  <input type="text" id="userInput" placeholder="Type here..." />
+  <button onclick="sendMessage()">Send</button>
+
+  <script>
+    const chat = document.getElementById('chat');
+
+    async function sendMessage() {
+      const inputEl = document.getElementById('userInput');
+      const message = inputEl.value;
+      if (!message) return;
+
+      // Show user message
+      chat.innerHTML += `<div class="user"><strong>You:</strong> ${message}</div>`;
+      inputEl.value = '';
+      chat.scrollTop = chat.scrollHeight;
+
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message })
+        });
+
+        const data = await res.json();
+        chat.innerHTML += `<div class="bot"><strong>Bot:</strong> ${data.reply}</div>`;
+        chat.scrollTop = chat.scrollHeight;
+
+      } catch (err) {
+        chat.innerHTML += `<div class="bot"><strong>Bot:</strong> Error connecting to API.</div>`;
+      }
+    }
+  </script>
+</body>
+</html>
