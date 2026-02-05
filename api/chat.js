@@ -12,7 +12,7 @@ export default async function handler(req, res) {
 
   try {
     const response = await fetch(
-      "https://api-inference.huggingface.co/models/chatbot", // your model name
+      "https://api-inference.huggingface.co/models/microsoft/Phi-3-mini-4k-instruct", // your model name
       {
         method: "POST",
         headers: {
