@@ -1,44 +1,40 @@
-// api/chat.js
+// File: /api/chat.js
+
 export default async function handler(req, res) {
-  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
+  // === 1. CORS headers ===
+  // Allow your Hostinger site (or any site) to call this endpoint
+  res.setHeader('Access-Control-Allow-Origin', '*'); // * = any site, you can replace with your Hostinger URL
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  const { message } = req.body;
-  if (!message) return res.status(400).json({ error: "No message provided" });
+  // Handle preflight OPTIONS request
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
 
-  // Get the token from Vercel environment variable
-  const HF_TOKEN = process.env.HF_TOKEN;
-
-  if (!HF_TOKEN) {
-    console.error("HF_TOKEN is missing!");
-    return res.status(500).json({ reply: "Server error: HF_TOKEN not found." });
+  // Only allow POST requests
+  if (req.method !== 'POST') {
+    res.status(405).json({ error: 'Method not allowed' });
+    return;
   }
 
   try {
-    // Call Hugging Face model
-    const response = await fetch(
-      "https://api-inference.huggingface.co/models/microsoft/Phi-3-mini-4k-instruct",
-      {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${HF_TOKEN}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ inputs: message })
-      }
-    );
+    const { message } = req.body;
 
-    const data = await response.json();
-    console.log("Hugging Face response:", data);
-
-    if (!data || !data[0]?.generated_text) {
-      return res.status(500).json({ reply: "AI did not return a proper response." });
+    if (!message) {
+      res.status(400).json({ error: 'No message provided' });
+      return;
     }
 
-    const botReply = data[0].generated_text;
-    res.status(200).json({ reply: botReply });
+    // === 2. Bot logic ===
+    // For now, simple echo; replace this with your real chatbot logic
+    const reply = `Bot says: ${message}`;
 
+    // === 3. Send response ===
+    res.status(200).json({ reply });
   } catch (err) {
-    console.error("Error calling Hugging Face API:", err);
-    res.status(500).json({ reply: "Error connecting to Hugging Face API." });
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
   }
 }
